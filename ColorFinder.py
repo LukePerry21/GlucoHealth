@@ -4,36 +4,50 @@ from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie1976
 from colormath.color_objects import LabColor, sRGBColor
 from sklearn.cluster import KMeans
+from statistics import mode
 
 
 class ColorFinder:
     def __init__(self, visualize=False):
         self.visualize = visualize
-        self.colors = [[48.9483, 41.6267, 48.5562], [71.0316, 52.5161, 73.1012], [69.7912, 52.2791, 71.2367],
-                       [78.4401, 46.8239, 75.1105], [79.2467, 56.6135, 64.6417],
-                       [77.795, 54.2564, 71.6756], [103.253, 76.9758, 83.7061]]
-        self.colorLabels = ["0 mg/ml", "2.2 mg/ml", "2.35 mg/ml",
-                            "2.5 mg/ml", "2.65 mg/ml",
-                            "2.8 mg/ml", "3.1 mg/ml"]
+        self.colors = [["0 mg/ml", [49.037, 43.146, 50.657]], ["0 mg/ml", [42.832, 36.156, 44.324]],
+                       ["0 mg/ml", [54.301, 45.050, 50.423]],
+                       ["2.2 mg/ml", [61.799, 47.709, 69.759]], ["2.2 mg/ml", [73.31, 48.827, 69.335]],
+                       ["2.2 mg/ml", [77.089, 60.114, 79.733]],
+                       ["2.35 mg/ml", [66.707, 48.81, 66.253]], ["2.35 mg/ml", [78.999, 61.811, 80.432]],
+                       ["2.35 mg/ml", [62.625, 44.679, 66.070]],
+                       ["2.5 mg/ml", [66.907, 54.399, 64.937]], ["2.5 mg/ml", [91.305, 72.603, 84.315]],
+                       ["2.5 mg/ml", [75.136, 60.098, 74.828]],
+                       ["2.65 mg/ml", [83.398, 57.803, 66.542]], ["2.65 mg/ml", [82.317, 60.814, 68.704]],
+                       ["2.65 mg/ml", [71.47, 50.764, 58.209]],
+                       ["2.8 mg/ml", [89.226, 61.02, 75.412]], ["2.8 mg/ml", [63.833, 43.558, 63.545]],
+                       ["2.8 mg/ml", [78.229, 56.659, 75.424]],
+                       ["3.1 mg/ml", [102.357, 78.851, 86.94]], ["3.1 mg/ml", [109.81, 81.353, 85.919]],
+                       ["3.1 mg/ml", [97.2, 70.294, 77.964]]]
+        self.distances = []
         self.colorBin = ''
-        self.colorBin_dist = ''
 
     def findBin(self, filename):
         color = self.find_Color(filename)
-        self.colorBin = ''
-        self.colorBin_dist = ''
-        for index, color_bin in enumerate(self.colors):
-            cb = self.convert_to_Lab(color_bin)
+        self.distances = []
+        for color_bin in self.colors:
+            cb = self.convert_to_Lab(color_bin[1])
             dist = self.find_distance(color, cb)
-            if self.colorBin == '':
-                self.colorBin = self.colorLabels[index]
-                self.colorBin_dist = dist
-            else:
-                if self.colorBin_dist > dist:
-                    self.colorBin = self.colorLabels[index]
-                    self.colorBin_dist = dist
-        print('Bin found')
-        print(f'Bin is {self.colorBin} and distance is {self.colorBin_dist}')
+            self.distances.append([color_bin[0], dist])
+        self.findKNearest(self.distances)
+
+    def findKNearest(self, distances, k=3):
+        try:
+            kNearest = []
+            for dist in distances:
+                kNearest.append(dist)
+                if len(kNearest) > k:
+                    neighbors = sorted(kNearest[:][1])
+                    ind = [np.where(neighbors == n) for n in neighbors]
+                    kNearest.remove(kNearest[np.where(ind == k)])
+            self.colorBin = mode(kNearest[:][0])    
+        except Exception as e:
+            print(e)
 
     @staticmethod
     def find_distance(color, color_bin):
@@ -124,9 +138,3 @@ class ColorFinder:
 # print('### 0 Test ###')
 # cf3 = ColorFinder(visualize=False)
 # cf3.findBin('Amyl_0(1).jpg')
-
-
-
-
-
-

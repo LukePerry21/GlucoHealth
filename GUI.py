@@ -28,10 +28,10 @@ class HomeWindow(QtWidgets.QMainWindow):
         self.displayLabel.setText(label)
 
     def load_file(self):
-        name, _ = QtWidgets.QFileDialog.getOpenFileName(
+        self._filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Load Image',
             '', "Image files (*.png *.jpg *.jpeg *.jfif *.tif *.tiff *.PNG *.JPG *.JPEG *.TIF *.TIFF)")
-        self._filename = Path(name)
+
 
 
 # run the pyqt code

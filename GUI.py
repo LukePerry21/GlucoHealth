@@ -31,7 +31,7 @@ class HomeWindow(QtWidgets.QMainWindow):
         self._filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Load Image',
             '', "Image files (*.png *.jpg *.jpeg *.jfif *.tif *.tiff *.PNG *.JPG *.JPEG *.TIF *.TIFF)")
-
+        
 
 
 # run the pyqt code

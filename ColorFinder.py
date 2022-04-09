@@ -11,19 +11,19 @@ class ColorFinder:
     def __init__(self, visualize=False):
         self.visualize = visualize
         self.colors = [["0 mg/ml", [49.037, 43.146, 50.657]], ["0 mg/ml", [42.832, 36.156, 44.324]],
-                       ["0 mg/ml", [54.301, 45.050, 50.423]],
+                    #    ["0 mg/ml", [54.301, 45.050, 50.423]],
                        ["2.2 mg/ml", [61.799, 47.709, 69.759]], ["2.2 mg/ml", [73.31, 48.827, 69.335]],
-                       ["2.2 mg/ml", [77.089, 60.114, 79.733]],
+                    #    ["2.2 mg/ml", [77.089, 60.114, 79.733]],
                        ["2.35 mg/ml", [66.707, 48.81, 66.253]], ["2.35 mg/ml", [78.999, 61.811, 80.432]],
-                       ["2.35 mg/ml", [62.625, 44.679, 66.070]],
+                    #    ["2.35 mg/ml", [62.625, 44.679, 66.070]],
                        ["2.5 mg/ml", [66.907, 54.399, 64.937]], ["2.5 mg/ml", [91.305, 72.603, 84.315]],
-                       ["2.5 mg/ml", [75.136, 60.098, 74.828]],
+                    #    ["2.5 mg/ml", [75.136, 60.098, 74.828]],
                        ["2.65 mg/ml", [83.398, 57.803, 66.542]], ["2.65 mg/ml", [82.317, 60.814, 68.704]],
-                       ["2.65 mg/ml", [71.47, 50.764, 58.209]],
+                    #    ["2.65 mg/ml", [71.47, 50.764, 58.209]],
                        ["2.8 mg/ml", [89.226, 61.02, 75.412]], ["2.8 mg/ml", [63.833, 43.558, 63.545]],
-                       ["2.8 mg/ml", [78.229, 56.659, 75.424]],
-                       ["3.1 mg/ml", [102.357, 78.851, 86.94]], ["3.1 mg/ml", [109.81, 81.353, 85.919]],
-                       ["3.1 mg/ml", [97.2, 70.294, 77.964]]]
+                    #    ["2.8 mg/ml", [78.229, 56.659, 75.424]],
+                       ["3.1 mg/ml", [102.357, 78.851, 86.94]], ["3.1 mg/ml", [109.81, 81.353, 85.919]] ]#,
+                    #    ["3.1 mg/ml", [97.2, 70.294, 77.964]]]
         self.distances = []
         self.colorBin = ''
 
@@ -33,21 +33,27 @@ class ColorFinder:
         for color_bin in self.colors:
             cb = self.convert_to_Lab(color_bin[1])
             dist = self.find_distance(color, cb)
-            self.distances.append([color_bin[0], dist])
+            self.distances.append([color_bin[0], float(dist)])
+        # print(f'self.distances = {self.distances}')
         self.findKNearest(self.distances)
 
     def findKNearest(self, distances, k=3):
-        try:
-            kNearest = []
-            for dist in distances:
-                kNearest.append(dist)
-                if len(kNearest) > k:
-                    neighbors = sorted(kNearest[:][1])
-                    ind = [np.where(neighbors == n) for n in neighbors]
-                    kNearest.remove(kNearest[np.where(ind == k)])
-            self.colorBin = mode(kNearest[:][0])    
-        except Exception as e:
-            print(e)
+        # try:
+        kNearest = None
+        for dist in distances:
+            # print(f'dist = {dist}')
+            # print(f'kNearest = {kNearest}')
+            if kNearest is None:
+                kNearest = [dist]
+            else:
+                kNearest = np.append(kNearest,[dist], axis=0)
+            if len(kNearest) > k:
+                neighbors = sorted(kNearest, key=lambda x: float(x[1]))
+                kNearest = neighbors[:-1]
+        print(f'kNearest = {kNearest}')       
+        self.colorBin = mode(kNearest[:][0])    
+        # except Exception as e:
+        #     print(e)
 
     @staticmethod
     def find_distance(color, color_bin):
